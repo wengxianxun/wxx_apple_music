@@ -64,12 +64,85 @@ class HomeView extends GetView<HomeController> {
       // drawer: _drawer,
       body: Container(
         color: GetTheme(HuuuaColorEnum.backgroundColor),
-        child: Obx(() {
-          if (controller.musicResult.value.trackList?.isEmpty ?? true) {
-            return NothingView();
-          }
-          return bodyListView();
-        }),
+        child: Column(
+          children: [
+            // 新增搜索框
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+              child: TextField(
+                decoration: InputDecoration(
+                  hintText: '搜索歌曲或专辑',
+                  hintStyle: TextStyle(
+                    color: GetTheme(HuuuaColorEnum.input_hint_text_color),
+                  ),
+                  fillColor: GetTheme(HuuuaColorEnum.input_backgroundcolor),
+                  filled: true,
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide.none,
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: GetTheme(HuuuaColorEnum.defaultTextColor),
+                  ),
+                ),
+                onChanged: (value) => controller.searchKeyword.value = value,
+              ),
+            ),
+            // 新增排序单选按钮组
+            Container(
+              height: 50.h,
+              width: Get.width,
+              child: Obx(() {
+                return Row(
+                  children: [
+                    Expanded(
+                      child: RadioListTile<SortType>(
+                        title: Text(
+                          '歌曲名排序',
+                          style: TextStyle(
+                            color: GetTheme(HuuuaColorEnum.defaultTextColor),
+                            fontSize: 14.sp,
+                          ),
+                        ),
+                        value: SortType.trackName,
+                        groupValue: controller.sortType.value,
+                        activeColor: Colors.amber,
+                        onChanged:
+                            (value) => controller.sortType.value = value!,
+                      ),
+                    ),
+                    Expanded(
+                      child: RadioListTile<SortType>(
+                        title: Text(
+                          '专辑名排序',
+                          style: TextStyle(
+                            color: GetTheme(HuuuaColorEnum.defaultTextColor),
+                            fontSize: 14.sp,
+                          ),
+                        ),
+                        value: SortType.collectionName,
+                        groupValue: controller.sortType.value,
+                        activeColor: Colors.amber,
+                        onChanged:
+                            (value) => controller.sortType.value = value!,
+                      ),
+                    ),
+                  ],
+                );
+              }),
+            ),
+            // 原有列表区域
+            Expanded(
+              child: Obx(() {
+                if (controller.filteredTrackList.isEmpty) {
+                  return NothingView();
+                }
+                return bodyListView();
+              }),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -92,10 +165,10 @@ class HomeView extends GetView<HomeController> {
   SliverList sliverListNovels() {
     return SliverList(
       delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
-        TrackModel model = controller.musicResult.value.trackList![index];
+        TrackModel model = controller.filteredTrackList[index]; // 使用过滤后的列表
 
         return HomeTrackCell(model: model, onClick: () {});
-      }, childCount: controller.musicResult.value.trackList!.length),
+      }, childCount: controller.filteredTrackList.length), // 使用过滤后的长度
     );
   }
 }
